@@ -1,10 +1,12 @@
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using SagreEventi.Web.Server.Extensions;
 using SagreEventi.Web.Server.HostedServices;
 using SagreEventi.Web.Server.Models.Services.Application;
 using SagreEventi.Web.Server.Models.Services.Infrastructure;
+using ZiggyCreatures.Caching.Fusion;
 
 namespace SagreEventi.Web.Server;
 
@@ -31,9 +33,17 @@ public class Startup(IConfiguration configuration)
             });
         });
 
+        // Configuro FusionCache con opzioni di default
+        services.AddFusionCache()
+            .WithDefaultEntryOptions(new FusionCacheEntryOptions
+            {
+                Duration = TimeSpan.FromMinutes(5),
+                Priority = CacheItemPriority.Low
+            });
+
         services.AddDbContextPool<AppDbContext>(optionsBuilder =>
         {
-            string connectionString = Configuration.GetSection("ConnectionStrings").GetValue<string>("Default");
+            var connectionString = Configuration.GetSection("ConnectionStrings").GetValue<string>("Default");
             optionsBuilder.UseSqlServer(connectionString, options =>
             {
                 // Info su: https://docs.microsoft.com/en-us/ef/core/miscellaneous/connection-resiliency
@@ -52,7 +62,7 @@ public class Startup(IConfiguration configuration)
 
     public void Configure(WebApplication app)
     {
-        IWebHostEnvironment env = app.Environment;
+        var env = app.Environment;
 
         if (env.IsDevelopment())
         {
