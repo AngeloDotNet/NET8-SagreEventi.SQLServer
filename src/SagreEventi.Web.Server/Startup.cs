@@ -47,7 +47,7 @@ public class Startup(IConfiguration configuration)
             optionsBuilder.UseSqlServer(connectionString, options =>
             {
                 // Info su: https://docs.microsoft.com/en-us/ef/core/miscellaneous/connection-resiliency
-                options.EnableRetryOnFailure(3); // Abilito il connection resiliency
+                options.EnableRetryOnFailure(3);                            // Abilito il connection resiliency
                 options.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName);
                 options.MigrationsHistoryTable("Migrations", "dbo");
             });
